@@ -39,7 +39,7 @@ AS
 				   ,@index  INT = 0 
 				   ,@count  INT = 1				  				
 
-			DECLARE @newtablename VARCHAR(MAX) = @tablename + 'zz' + @table + '_' + @date
+			DECLARE @newtablename VARCHAR(MAX) = 'zz' + @table + '_' + @date
 			DECLARE @dupeCount INT = ( SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME LIKE @newtablename + '%') + 1 
 			
 			IF @dupeCount > 0 
@@ -48,9 +48,11 @@ AS
 					SELECT @newtablename = @newtablename + '_' + CONVERT(VARCHAR(100), @dupeCount)
 
 				END 
+			-- Make sure the schema is database is added. 
+			SELECT @newtablename = @tablename + @newtablename
 
-			SELECT @create = 'CREATE TABLE ' + @newtablename + '(' 
-				  ,@insert = 'INSERT INTO '  + @newtablename + '('
+			SELECT @create = CONCAT('CREATE TABLE ',  @newtablename, '(' )   
+				  ,@insert = CONCAT('INSERT INTO ',  @newtablename , '(' )
 				  ,@select = 'SELECT ' 
 
 			CREATE TABLE #Columns ( PK INT IDENTITY(1,1), Position INT, Name VARCHAR(MAX), DataType VARCHAR(MAX)) 
@@ -68,19 +70,7 @@ AS
 						ELSE c.DATA_TYPE
 						END
 			FROM INFORMATION_SCHEMA.TABLES t
-					INNER JOIN INFORMATION_SCHEMA.COLUMNS c ON t.TABLE_NAME = c.TABLE_NAME
-					-- Will use this later. 
-					--LEFT JOIN (
-					--	SELECT ku.TABLE_CATALOG,ku.TABLE_SCHEMA,ku.TABLE_NAME,ku.COLUMN_NAME
-					--	FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS AS tc
-					--	INNER JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS ku
-					--		ON tc.CONSTRAINT_TYPE = 'PRIMARY KEY' 
-					--		AND tc.CONSTRAINT_NAME = ku.CONSTRAINT_NAME
-					-- )   pk 
-					--		ON  c.TABLE_CATALOG = pk.TABLE_CATALOG
-					--					AND c.TABLE_SCHEMA = pk.TABLE_SCHEMA
-					--					AND c.TABLE_NAME = pk.TABLE_NAME
-					--					AND c.COLUMN_NAME = pk.COLUMN_NAME
+					INNER JOIN INFORMATION_SCHEMA.COLUMNS c ON t.TABLE_NAME = c.TABLE_NAME					
 			WHERE t.TABLE_NAME = @table
 			
 			SELECT @index = (SELECT COUNT(*) FROM #Columns) 
@@ -89,17 +79,20 @@ AS
 				BEGIN 
 
 					SELECT @create = @create + 
-									c.Name + SPACE(1) + c.DataType + SPACE(1) + 
+									c.Name + SPACE(1) + 
+									CASE WHEN c.DataType = 'timestamp' THEN 'varbinary(8)'
+										 ELSE c.DataType
+									END + SPACE(1) + 									
 									CASE WHEN @count < @index THEN ', '
-									ELSE ')' 
+										ELSE ')' 
 									END
 						  ,@insert = @insert + c.Name + 
 									CASE WHEN @count < @index THEN ', '
-									ELSE ')' 
+										 ELSE ')' 
 									END
 						  ,@select = @select + c.Name + 
 									CASE WHEN @count < @index THEN ', '
-									ELSE ' FROM '  +  @tablename + @table
+										 ELSE ' FROM '  +  @tablename + @table
 									END
 					FROM #Columns c 
 					WHERE c.PK = @count
@@ -110,6 +103,8 @@ AS
 
 				SELECT @SQL = @create + CHAR(10) + CHAR(13) + @insert + CHAR(10) + CHAR(13) +  @select
 				EXEC (@sql) 
+
+				--PRINT @sql 
 
 				PRINT @newtablename 
 
