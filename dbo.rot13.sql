@@ -4,6 +4,7 @@
 -- Description: Direction: 
 --						0 = Encrypt 
 --						1 = decrypt
+-- I am not sure why anyone would want to do this in SQL, but here we are. 
 -- boilerplate from: https://spaghettidba.com/2011/07/08/my-stored-procedure-code-template/
 -- =============================================
 ALTER PROCEDURE dbo.rot13
