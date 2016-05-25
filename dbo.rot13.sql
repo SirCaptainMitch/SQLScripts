@@ -42,12 +42,13 @@ BEGIN
 			BEGIN 						
 				WHILE @index <= @count
 					BEGIN 
-						SELECT @holder = @holder + CASE WHEN ASCII(SUBSTRING(@cipher, @index, 1)) BETWEEN 65 AND 77 
-															THEN CHAR(ASCII(SUBSTRING(@cipher, @index, 1)) + 13) 
-														WHEN ASCII(SUBSTRING(@cipher, @index, 1)) BETWEEN 78 AND 90 
-															THEN CHAR(ASCII(SUBSTRING(@cipher, @index, 1)) - 13) 
-														ELSE SUBSTRING(@cipher, @index, 1)
-													END 
+						SELECT @holder = @holder 
+										+ CASE WHEN ASCII(SUBSTRING(@cipher, @index, 1)) BETWEEN 65 AND 77 
+													THEN CHAR(ASCII(SUBSTRING(@cipher, @index, 1)) + 13) 
+											   WHEN ASCII(SUBSTRING(@cipher, @index, 1)) BETWEEN 78 AND 90 
+													THEN CHAR(ASCII(SUBSTRING(@cipher, @index, 1)) - 13) 
+											   ELSE SUBSTRING(@cipher, @index, 1)
+										   END 
 
 						SELECT @index = @index + 1
 							  
@@ -57,12 +58,13 @@ BEGIN
 			BEGIN 						
 				WHILE @index <= @count
 					BEGIN 
-						SELECT @holder = @holder + CASE WHEN ASCII(SUBSTRING(@cipher, @index, 1)) BETWEEN 65 AND 77 
-															THEN CHAR(ASCII(SUBSTRING(@cipher, @index, 1)) - 13) 
-														WHEN ASCII(SUBSTRING(@cipher, @index, 1)) BETWEEN 78 AND 90 
-															THEN CHAR(ASCII(SUBSTRING(@cipher, @index, 1)) + 13) 
-														ELSE SUBSTRING(@cipher, @index, 1)
-													END 
+						SELECT @holder = @holder 
+										 + CASE WHEN ASCII(SUBSTRING(@cipher, @index, 1)) BETWEEN 65 AND 77 
+													THEN CHAR(ASCII(SUBSTRING(@cipher, @index, 1)) - 13) 
+												WHEN ASCII(SUBSTRING(@cipher, @index, 1)) BETWEEN 78 AND 90 
+													THEN CHAR(ASCII(SUBSTRING(@cipher, @index, 1)) + 13) 
+												ELSE SUBSTRING(@cipher, @index, 1)
+											END 
 
 						SELECT @index = @index + 1
 							  
