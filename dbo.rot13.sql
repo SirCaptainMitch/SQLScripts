@@ -8,8 +8,7 @@
 -- boilerplate from: https://spaghettidba.com/2011/07/08/my-stored-procedure-code-template/
 -- =============================================
 ALTER PROCEDURE dbo.rot13
-				( @cipher VARCHAR(254) = 'Check out my string!'
-				 ,@direction BIT = 0 ) 
+				( @cipher VARCHAR(254) = 'Check out my string!' ) 
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -37,40 +36,20 @@ BEGIN
 
 		SELECT @count = DATALENGTH(@cipher)
 			   ,@cipher = ( SELECT UPPER(@cipher) )
-			   
+			   			
+		WHILE @index <= @count
+			BEGIN 
+				SELECT @holder = @holder 
+								+ CASE WHEN ASCII(SUBSTRING(@cipher, @index, 1)) BETWEEN 65 AND 77 
+											THEN CHAR(ASCII(SUBSTRING(@cipher, @index, 1)) + 13) 
+										WHEN ASCII(SUBSTRING(@cipher, @index, 1)) BETWEEN 78 AND 90 
+											THEN CHAR(ASCII(SUBSTRING(@cipher, @index, 1)) - 13) 
+										ELSE SUBSTRING(@cipher, @index, 1)
+									END 
 
-		IF @direction = 0
-			BEGIN 						
-				WHILE @index <= @count
-					BEGIN 
-						SELECT @holder = @holder 
-										+ CASE WHEN ASCII(SUBSTRING(@cipher, @index, 1)) BETWEEN 65 AND 77 
-													THEN CHAR(ASCII(SUBSTRING(@cipher, @index, 1)) + 13) 
-											   WHEN ASCII(SUBSTRING(@cipher, @index, 1)) BETWEEN 78 AND 90 
-													THEN CHAR(ASCII(SUBSTRING(@cipher, @index, 1)) - 13) 
-											   ELSE SUBSTRING(@cipher, @index, 1)
-										   END 
-
-						SELECT @index = @index + 1
+				SELECT @index = @index + 1
 							  
-					END 		
-			END
-		ELSE 
-			BEGIN 						
-				WHILE @index <= @count
-					BEGIN 
-						SELECT @holder = @holder 
-										 + CASE WHEN ASCII(SUBSTRING(@cipher, @index, 1)) BETWEEN 65 AND 77 
-													THEN CHAR(ASCII(SUBSTRING(@cipher, @index, 1)) - 13) 
-												WHEN ASCII(SUBSTRING(@cipher, @index, 1)) BETWEEN 78 AND 90 
-													THEN CHAR(ASCII(SUBSTRING(@cipher, @index, 1)) + 13) 
-												ELSE SUBSTRING(@cipher, @index, 1)
-											END 
-
-						SELECT @index = @index + 1
-							  
-					END 		
-			END
+			END 		
 
 		
 		PRINT @holder
