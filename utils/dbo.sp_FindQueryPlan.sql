@@ -11,7 +11,7 @@ GO
 
 ALTER PROCEDURE [dbo].[sp_FindQueryPlan]
     @DatabaseName NVARCHAR(128), 
-    @ObjectName NVARCHAR(128) 
+    @ObjectName NVARCHAR(128) = NULL  
 WITH RECOMPILE
 AS
 SET NOCOUNT ON;
@@ -49,7 +49,7 @@ SELECT o.object_id
 FROM sys.objects o 
 	 INNER JOIN sys.dm_exec_procedure_stats s on o.object_id = s.object_id
 	 CROSS APPLY sys.dm_exec_query_plan(s.plan_handle) h	 
-WHERE o.object_id = @ObjectId'
+WHERE o.object_id = ISNULL(@ObjectId, o.object_id)'
 
 INSERT #ProcCache 
 	  (  ObjectId
@@ -83,6 +83,9 @@ SELECT ObjectId
 	   ,CachedTime
 	   ,ExecCount
 	   ,[LastElapsedTime(S)]
+	   ,[LastElapsedTime(S)] * CONVERT(NUMERIC(12,4), ExecCount) AS TotalExecTime
 	   ,SetOptions 
 FROM #ProcCache
-ORDER BY ExecCount DESC, [LastElapsedTime(S)] DESC 
+ORDER BY [LastElapsedTime(S)] * CONVERT(NUMERIC(12,4), ExecCount) DESC, [LastElapsedTime(S)] DESC 
+
+GO
