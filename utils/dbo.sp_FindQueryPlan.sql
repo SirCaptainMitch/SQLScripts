@@ -50,7 +50,8 @@ BEGIN
 	FROM sys.objects o 
 		INNER JOIN sys.dm_exec_procedure_stats s on o.object_id = s.object_id
 		CROSS APPLY sys.dm_exec_query_plan(s.plan_handle) h	 
-	WHERE o.object_id = ISNULL(@ObjectId, o.object_id)'
+	WHERE o.object_id = ISNULL(@ObjectId, o.object_id)
+	OPTION (RECOMPILE)'
 
 	INSERT #ProcCache 
 		(  ObjectId
@@ -89,4 +90,6 @@ BEGIN
 	FROM #ProcCache
 	ORDER BY [LastElapsedTime(S)] * CONVERT(NUMERIC(12,4), ExecCount) DESC, [LastElapsedTime(S)] DESC 
 END
-	GO
+
+
+GO
