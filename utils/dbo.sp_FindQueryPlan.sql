@@ -32,6 +32,8 @@ BEGIN
 				,CachedTime DATETIME
 				,ExecCount INT 			 
 				,[LastElapsedTime(S)] NUMERIC(12,4)
+				,[MinElapsedTime(S)] NUMERIC(12,4) 
+				,[MaxElapsedTime(S)] NUMERIC(12,4) 
 				,SetOptions VARCHAR(1000) 
 				) 
 
@@ -47,6 +49,8 @@ BEGIN
 		, s.cached_time
 		, S.execution_count
 		, CONVERT(NUMERIC(12,4),( CONVERT(NUMERIC,s.last_elapsed_time) / CONVERT(NUMERIC,1000000) )) 
+		, CONVERT(NUMERIC(12,4),( CONVERT(NUMERIC,s.min_elapsed_time) / CONVERT(NUMERIC,1000000) )) 
+		, CONVERT(NUMERIC(12,4),( CONVERT(NUMERIC,s.max_elapsed_time) / CONVERT(NUMERIC,1000000) )) 
 	FROM sys.objects o 
 		INNER JOIN sys.dm_exec_procedure_stats s on o.object_id = s.object_id
 		CROSS APPLY sys.dm_exec_query_plan(s.plan_handle) h	 
@@ -60,7 +64,9 @@ BEGIN
 		, QueryPlan
 		, CachedTime
 		, ExecCount
-		, [LastElapsedTime(S)]) 
+		, [LastElapsedTime(S)]
+		, [MinElapsedTime(S)]
+		, [MaxElapsedTime(S)]) 
 	EXEC sp_executesql @sql, N'@ObjectName VARCHAR(255)', @ObjectName
 
 	-- This part taken from SQL First Responder Kit 
@@ -85,10 +91,11 @@ BEGIN
 		,CachedTime
 		,ExecCount
 		,[LastElapsedTime(S)]
-		,[LastElapsedTime(S)] * CONVERT(NUMERIC(12,4), ExecCount) AS TotalExecTime
+		,[MinElapsedTime(S)]
+		,[MaxElapsedTime(S)]
 		,SetOptions 
 	FROM #ProcCache
-	ORDER BY [LastElapsedTime(S)] * CONVERT(NUMERIC(12,4), ExecCount) DESC, [LastElapsedTime(S)] DESC 
+	ORDER BY [MinElapsedTime(S)]
 END
 
 
