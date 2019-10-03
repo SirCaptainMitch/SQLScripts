@@ -31,7 +31,7 @@ CREATE TABLE #Loginfo
 			( 
 			  RecoveryUnitId INT 
 			 ,FileID TINYINT 
-			 ,FileSize INT 
+			 ,FileSize BIGINT 
 			 ,StartOffset BIGINT 
 			 ,FSeqNo INT 
 			 ,[Status] TINYINT
